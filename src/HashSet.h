@@ -9,102 +9,85 @@
 #define HASHSET_H_
 #include <list>
 #include <functional>
+#include <algorithm>
 #include <vector>
 using namespace std;
-const static float kMaxBuckets = 20;
+const static float kMaxBuckets = 50;
 template <typename T>
 class HashSet {
 public:
 
 
-	HashSet():bucket_size(0),
-	bucket_count(0),
-	buckets(){};
+    HashSet():bucket_size(0),
+    bucket_count(0),
+    buckets()
+{
+        rehash();
+}
 
 
 
 
-	/***************************************************************
-	 * function needed to initialize media
-	 * @param None
-	 * @return True if init is well done
-	 ****************************************************************/
-	bool insert(T input)
-	{
-		if(find(input)) return false;
-		if(buckets.empty())
-		{
-			rehash();
-		}
-		float avgsize = bucket_size/buckets.capacity();
-		if(avgsize > kMaxBuckets)
-		{
-			rehash();
-		}
-		int bind = (std::hash<T>{}(input)) % buckets.capacity();
-		if(bind < buckets.size())
-		{
-			std::list<T> tmplist;
-			buckets.emplace_back(tmplist);
-		}
-		buckets[bind].emplace_back(input);
-		bucket_size++;
+    /***************************************************************
+     * function needed to initialize media
+     * @param None
+     * @return True if init is well done
+     ****************************************************************/
+    bool insert(T input)
+    {
+        if(find(input)) return false;
+        float avgsize =  ((float)bucket_size/buckets.size());
+
+        if(avgsize > kMaxBuckets)
+        {
+            rehash();
+        }
+
+        int bind = (std::hash<T>{}(input)) % buckets.size();
+        buckets[bind].emplace_back(input);
+        bucket_size++;
         return true;
-	}
+    }
 
-	bool find(T input)
-	{
-		 //int bind = (std::hash<T>{}(input)) % buckets.size();
-         return false;
-	}
+    bool find(T input)
+    {
+        int bind = (std::hash<T>{}(input)) % buckets.size();
+        return ((std::find(buckets[bind].begin(), buckets[bind].end(), input)) != buckets[bind].end());
+    }
 
-	void rehash()
-	{
+    void rehash()
+    {
+        std::list<T> tmplist;
+        buckets.emplace_back(tmplist);
+        std::vector<std::list<T>> tempbuckets;
+        for(int i = buckets.size(); i>0 ; i--)
+        {
+            tempbuckets.push_back(tmplist);
 
-		if(buckets.empty())
-		{
-			std::list<T> tmplist;
-			buckets.emplace_back(tmplist);
-		}
-		else
-		{
-			std::cout<< "REHASHING" << std::endl;
-			std::vector<std::list<T>> tempbuckets;
-			tempbuckets.reserve(buckets.size()*2);
-			for(auto elem: buckets)
-			{
-				std::list<T> tmplist;
-				for(auto ele : elem)
-				{
-					auto value = std::hash<T>{}(ele);
-					std::cout << value << " " << tempbuckets.size() <<" ";
-					//int bind = (value) % tempbuckets.size();
-					//tempbuckets[bind].emplace_back(ele);
-				}
-			}
-			//buckets.clear();
-			//buckets = tempbuckets;*/
-		}
+        }
+        for(auto elem: buckets)
+        {
+            for(auto ele : elem)
+            {
+                int bind = (std::hash<T>{}(ele)) % buckets.size();
+                tempbuckets[bind].push_back(ele);
+            }
+        }
+        buckets.clear();
+        buckets = tempbuckets;
 
-	};
+    }
 
 
-	void print()
-	{
-		for(auto elem: buckets)
-		{
-			for(auto ele : elem)
-			{
-				std::cout<< ele << std::endl;
-			}
-		}
-		std::cout<< buckets.size() << std::endl;
-	};
+    void print()
+    {
+        std::cout<< "bucket_size = " << bucket_size << "bucket_count = " << buckets.size() << std::endl;
+    }
 
 private:
-	int bucket_size;
-	int bucket_count;
-	std::vector<std::list<T>> buckets;
+    int bucket_size;
+    int bucket_count;
+    std::vector<std::list<T>> buckets;
 
 };
 

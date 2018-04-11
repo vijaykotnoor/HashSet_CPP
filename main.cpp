@@ -15,9 +15,19 @@ using stringset = std::unordered_set<std::string>;
 
 int main(int argc, char **argv) {
     HashSet<int> hset;
-    for(auto i = 0 ; i< 113; i++)
+    cout<< argv[1];
+    for(auto i = 0 ; i< stoi(argv[1]); i++)
     hset.insert(i);
 
     hset.print();
+
+    hset.insert(40);
+
+    hset.print();
+
+    hset.insert(41);
+
+    hset.print();
+
       return 0;
 }
